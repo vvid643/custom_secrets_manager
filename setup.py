@@ -6,7 +6,7 @@ NAME = "custom_secrets_manager"
 DESCRIPTION = "A utility for managing secrets and API keys"
 AUTHOR = "Vashishtha Vidyarthi"
 LICENSE = "MIT"
-URL = ""
+URL = "https://github.com/vvid643/custom_secrets_manager"
 
 # Package dependencies
 REQUIRES = [
