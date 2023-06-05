@@ -30,7 +30,7 @@ setup(
     packages=find_packages(),
     install_requires=REQUIRES,
     classifiers=[
-        "Development Status :: 5 - Production/Stable",
+        "Development Status :: 4 - Beta",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
