@@ -76,7 +76,7 @@ def update_secrets_registry(
                 secrets_registry[key] = value
                 logger.info(f"Added secret '{key}' from '{secrets_file}'")
 
-    with open(secrets_registry_file, "w") as f:
+    with open(os.path.join(parent_dir, secrets_registry_file), "w") as f:
         for key, value in secrets_registry.items():
             f.write(f"{key}: {value}\n")
 
