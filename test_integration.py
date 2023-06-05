@@ -37,6 +37,8 @@ def test_integration_update_secrets_registry(test_environment):
     parent_dir = test_environment
     secrets_registry_file = "secrets_registry.log"
     secrets_files = ["secrets.yaml", "secrets.json", "secrets.ini"]
+    key_file = ""
+    disable_encryption = True
 
     # breakpoint()
 
@@ -53,6 +55,8 @@ def test_integration_update_secrets_registry(test_environment):
         secrets_files,
         logger,
         secrets_registry,
+        key_file,
+        disable_encryption,
     )
 
     # Assert that the secrets registry file was created

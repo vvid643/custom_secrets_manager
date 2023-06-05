@@ -25,6 +25,8 @@ def test_update_secrets_registry(mock_open, mock_load_secrets):
     parent_dir = os.path.dirname(os.path.abspath(__file__))
     secrets_registry_file = "secrets_registry.log"
     secrets_files = ["secrets.yaml"]
+    key_file = ""
+    disable_encryption = True
 
     # Mock the return value of load_secrets
     mock_load_secrets.return_value = {
@@ -52,7 +54,13 @@ def test_update_secrets_registry(mock_open, mock_load_secrets):
 
         # Call the function to update the secrets registry
         update_secrets_registry(
-            parent_dir, secrets_registry_file, secrets_files, logger, secrets_registry
+            parent_dir,
+            secrets_registry_file,
+            secrets_files,
+            logger,
+            secrets_registry,
+            key_file,
+            disable_encryption,
         )
 
         # Assert that load_secrets was called with the correct file path
@@ -78,7 +86,12 @@ def test_update_secrets_registry(mock_open, mock_load_secrets):
 @patch("custom_secrets_manager.starter_process.setup_logging")
 @patch("custom_secrets_manager.starter_process.scan_secrets_files")
 @patch("custom_secrets_manager.starter_process.update_secrets_registry")
+@patch(
+    "custom_secrets_manager.starter_process.os.getcwd",
+    return_value=os.path.dirname(__file__),
+)
 def test_main(
+    mock_os_getcwd,
     mock_update_secrets_registry,
     mock_scan_secrets_files,
     mock_setup_logging,
