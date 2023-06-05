@@ -1,7 +1,29 @@
+import argparse
 import os
 import logging
 from logging.handlers import RotatingFileHandler
 from custom_secrets_manager.secrets_loader import load_secrets
+from custom_secrets_manager.encryption_helper import (
+    save_encryption_key,
+    encrypt_secrets,
+)
+
+
+def parse_arguments():
+    parser = argparse.ArgumentParser(description="Starter Process")
+    parser.add_argument(
+        "-k",
+        "--key-file",
+        default="encryption_key.txt",
+        help="Path to the encryption key file (default: encryption_key.txt)",
+    )
+    parser.add_argument(
+        "-d",
+        "--disable-encryption",
+        action="store_true",
+        help="Disable encryption of secrets registry",
+    )
+    return parser.parse_args()
 
 
 def get_os_environ(key):
@@ -35,10 +57,10 @@ def check_gitignore(dir_path, logger):
     """
     expected_git_ignore_path = os.path.join(dir_path, ".gitignore")
     if os.path.isfile(expected_git_ignore_path):
-        logger.info("Found .gitignore ...")
+        logger.info("Found .gitignore...")
         return True
     else:
-        logger.info(".gitignore not found, creating one ...")
+        logger.info(".gitignore not found, creating one...")
         return False
 
 
@@ -107,7 +129,13 @@ def scan_secrets_files(parent_dir):
 
 
 def update_secrets_registry(
-    parent_dir, secrets_registry_file, secrets_files, logger, secrets_registry
+    parent_dir,
+    secrets_registry_file,
+    secrets_files,
+    logger,
+    secrets_registry,
+    key_file,
+    disable_encryption,
 ):
     """
     Update the secrets registry with secrets from files.
@@ -135,15 +163,31 @@ def update_secrets_registry(
                 secrets_registry[key] = value
                 logger.info(f"Added secret '{key}' from '{secrets_file}'")
 
-    with open(os.path.join(parent_dir, secrets_registry_file), "w") as f:
-        for key, value in secrets_registry.items():
-            f.write(f"{key}: {value}\n")
+    if not disable_encryption:
+        encrypted_secrets = encrypt_secrets(secrets_registry, key_file)
+        # Write the encrypted secrets to the secrets_registry.log file
+        with open(os.path.join(parent_dir, secrets_registry_file), "wb") as f:
+            f.write(encrypted_secrets)
+        logger.info("Secrets registry encrypted and written to secrets_registry.log")
+    else:
+        logger.warning(
+            "Secrets will be stored without encryption. This is NOT recommended. "
+            "Please delete the secrets_registry.log after reading to avoid a security lapse."
+        )
+        with open(os.path.join(parent_dir, secrets_registry_file), "w") as f:
+            for key, value in secrets_registry.items():
+                f.write(f"{key}: {value}\n")
 
 
 def main():
     """
     Main entry point of the starter process.
     """
+    # Parse command line arguments
+    args = parse_arguments()
+    key_file = args.key_file
+    disable_encryption = args.disable_encryption
+
     # Configuration
     current_dir = os.getcwd()
     secrets_registry_file = os.path.join(current_dir, "secrets_registry.log")
@@ -151,6 +195,13 @@ def main():
 
     # Set up logging
     logger = setup_logging(log_file)
+
+    # Save encryption key
+    if not disable_encryption:
+        if key_file == "encryption_key.txt":
+            key_file = os.path.join(current_dir, key_file)
+
+        save_encryption_key(key_file, logger)
 
     # Scan parent directory for secrets files
     secrets_files = scan_secrets_files(current_dir)
@@ -160,19 +211,19 @@ def main():
 
     # Update secrets registry
     update_secrets_registry(
-        current_dir, secrets_registry_file, secrets_files, logger, secrets_registry
+        current_dir,
+        secrets_registry_file,
+        secrets_files,
+        logger,
+        secrets_registry,
+        key_file,
+        disable_encryption,
     )
 
     # Check if the current directory is a git repository
     if check_git_repository(current_dir):
         check_gitignore(current_dir, logger)
         update_gitignore(current_dir, logger)
-
-    # Example usage
-    # database_host = secrets['database']['host']
-    # database_username = secrets['database']['username']
-    # database_password = secrets['database']['password']
-    # api_key = secrets['api_key']
 
 
 if __name__ == "__main__":
