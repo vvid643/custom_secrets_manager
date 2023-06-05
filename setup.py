@@ -9,9 +9,7 @@ LICENSE = "MIT"
 URL = "https://github.com/vvid643/custom_secrets_manager"
 
 # Package dependencies
-REQUIRES = [
-    "anyconfig==0.13.0",
-]
+REQUIRES = ["anyconfig==0.13.0", "cryptography==41.0.1"]
 
 # Readme file content
 with open("README.md", "r") as f:
@@ -30,7 +28,7 @@ setup(
     packages=find_packages(),
     install_requires=REQUIRES,
     classifiers=[
-        "Development Status :: 3 - Alpha",
+        "Development Status :: 4 - Beta",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
