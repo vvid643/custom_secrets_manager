@@ -10,7 +10,7 @@ URL = "https://github.com/vvid643/custom_secrets_manager"
 
 # Package dependencies
 REQUIRES = [
-    "anyconfig",
+    "anyconfig==0.13.0",
 ]
 
 # Readme file content
