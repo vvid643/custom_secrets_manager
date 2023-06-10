@@ -83,7 +83,6 @@ def test_update_secrets_registry(mock_open, mock_load_secrets):
         mock_open.assert_not_called()
 
 
-@patch("custom_secrets_manager.starter_process.setup_logging")
 @patch("custom_secrets_manager.starter_process.scan_secrets_files")
 @patch("custom_secrets_manager.starter_process.update_secrets_registry")
 @patch(
@@ -94,12 +93,10 @@ def test_main(
     mock_os_getcwd,
     mock_update_secrets_registry,
     mock_scan_secrets_files,
-    mock_setup_logging,
 ):
     starter_process.main()
 
     # Add assertions to verify the expected behavior
-    mock_setup_logging.assert_called_once()
     mock_scan_secrets_files.assert_called_once()
     mock_update_secrets_registry.assert_called_once()
     # mock_load_secrets.assert_called_once()
