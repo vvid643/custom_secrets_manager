@@ -1,128 +1,35 @@
-import argparse
 import os
-import logging
-from logging.handlers import RotatingFileHandler
+
 from custom_secrets_manager.secrets_loader import load_secrets
 from custom_secrets_manager.encryption_helper import (
     save_encryption_key,
     encrypt_secrets,
 )
-
-
-def parse_arguments():
-    parser = argparse.ArgumentParser(description="Starter Process")
-    parser.add_argument(
-        "-k",
-        "--key-file",
-        default="encryption_key.txt",
-        help="Path to the encryption key file (default: encryption_key.txt)",
-    )
-    parser.add_argument(
-        "-d",
-        "--disable-encryption",
-        action="store_true",
-        help="Disable encryption of secrets registry",
-    )
-    return parser.parse_args()
+from custom_secrets_manager.workflow_helper import setup_starter, sanitise_secrets_logs
+from custom_secrets_manager.constants import _PLAUSIBLE_FILE_EXT, _PLAUSIBLE_KEY_NAMES
 
 
 def get_os_environ(key):
     return os.environ.get(key)
 
 
-def check_git_repository(dir_path):
-    """
-    Check if the given directory is a git repository.
-
-    Args:
-        dir_path (str): Path to the directory.
-
-    Returns:
-        bool: True if the directory is a git repository, False otherwise.
-    """
-    git_dir = os.path.join(dir_path, ".git")
-    return os.path.isdir(git_dir)
-
-
-def check_gitignore(dir_path, logger):
-    """
-    Check if the directory contains a .gitignore file.
-
-    Args:
-        dir_path (str): Path to the directory.
-        logger (logging.Logger): Logger instance.
-
-    Returns:
-        bool: True if .gitignore file is found, False otherwise.
-    """
-    expected_git_ignore_path = os.path.join(dir_path, ".gitignore")
-    if os.path.isfile(expected_git_ignore_path):
-        logger.info("Found .gitignore...")
-        return True
-    else:
-        logger.info(".gitignore not found, creating one...")
-        return False
-
-
-def update_gitignore(dir_path, logger):
-    """
-    Update the .gitignore file to include "secrets_registry.log" and "load_config_process.log".
-
-    Args:
-        dir_path (str): Path to the directory.
-        logger (logging.Logger): Logger instance.
-
-    If the .gitignore file does not exist, it will be created.
-    """
-    gitignore_path = os.path.join(dir_path, ".gitignore")
-    secrets_registry_entry = "secrets_registry.log"
-    load_config_entry = "load_config_process.log"
-
-    with open(gitignore_path, "a+") as f:
-        f.seek(0)
-        content = f.read()
-        if secrets_registry_entry not in content:
-            f.write(f"\n{secrets_registry_entry}\n")
-        if load_config_entry not in content:
-            f.write(f"{load_config_entry}\n")
-
-    logger.info(".gitignore file updated")
-
-
-def setup_logging(log_file):
-    """
-    Set up logging configuration.
-
-    Args:
-        log_file (str): Path to the log file.
-
-    Returns:
-        logging.Logger: Configured logger.
-    """
-    log_format = "%(asctime)s - %(levelname)s - %(message)s"
-    log_formatter = logging.Formatter(log_format)
-    log_handler = RotatingFileHandler(log_file, maxBytes=1048576, backupCount=3)
-    log_handler.setFormatter(log_formatter)
-    logger = logging.getLogger()
-    logger.setLevel(logging.INFO)
-    logger.addHandler(log_handler)
-    return logger
-
-
-def scan_secrets_files(parent_dir):
+def scan_secrets_files(parent_dir, scan_file_ext=None):
     """
     Scan the parent directory for secrets files.
 
     Args:
         parent_dir (str): Path to the parent directory.
+        scan_file_ext (list): File types where secrets are to be scanned
 
     Returns:
         list: List of secrets file paths.
     """
+    if scan_file_ext is None:
+        scan_file_ext = _PLAUSIBLE_FILE_EXT
     secrets_files = []
     for f in os.listdir(parent_dir):
-        if any(keyword in f.lower() for keyword in ["secrets", "keys"]) and any(
-            f.endswith(extension) for extension in [".yaml", ".json", ".ini"]
+        if any(keyword in f.lower() for keyword in _PLAUSIBLE_KEY_NAMES) and any(
+            f.endswith(extension) for extension in scan_file_ext
         ):
             secrets_files.append(f)
     return secrets_files
@@ -134,8 +41,8 @@ def update_secrets_registry(
     secrets_files,
     logger,
     secrets_registry,
-    key_file,
-    disable_encryption,
+    key_file=None,
+    disable_encryption=False,
 ):
     """
     Update the secrets registry with secrets from files.
@@ -146,6 +53,8 @@ def update_secrets_registry(
         secrets_files (list): List of secrets file paths.
         logger (logging.Logger): Logger instance.
         secrets_registry (dict): Dictionary to store the secrets registry.
+        key_file (str): Path where encryption key is stored. (Default None)
+        disable_encryption (bool): If encryption is to be used. (Default False)
     """
     for secrets_file in secrets_files:
         file_path = os.path.join(parent_dir, secrets_file)
@@ -183,18 +92,11 @@ def main():
     """
     Main entry point of the starter process.
     """
-    # Parse command line arguments
-    args = parse_arguments()
+    # Load arguments, set up logger and log files
+    args, logger, current_dir, secrets_registry_file = setup_starter()
     key_file = args.key_file
     disable_encryption = args.disable_encryption
-
-    # Configuration
-    current_dir = os.getcwd()
-    secrets_registry_file = os.path.join(current_dir, "secrets_registry.log")
-    log_file = "load_config_process.log"
-
-    # Set up logging
-    logger = setup_logging(log_file)
+    target_file_type = args.file_type
 
     # Save encryption key
     if not disable_encryption:
@@ -204,7 +106,9 @@ def main():
         save_encryption_key(key_file, logger)
 
     # Scan parent directory for secrets files
-    secrets_files = scan_secrets_files(current_dir)
+    if isinstance(target_file_type, str):
+        target_file_type = [target_file_type]
+    secrets_files = scan_secrets_files(current_dir, scan_file_ext=target_file_type)
 
     # Initialize secrets registry
     secrets_registry = {}
@@ -220,10 +124,8 @@ def main():
         disable_encryption,
     )
 
-    # Check if the current directory is a git repository
-    if check_git_repository(current_dir):
-        check_gitignore(current_dir, logger)
-        update_gitignore(current_dir, logger)
+    # Clean up files from git tracking
+    sanitise_secrets_logs(current_dir, logger)
 
 
 if __name__ == "__main__":
