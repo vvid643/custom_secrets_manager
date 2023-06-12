@@ -1,3 +1,5 @@
+A utility for managing secrets and API keys
+
 This starter_process script performs the following tasks:
   - Creates a `secrets_registry.log` file as a database for secrets, API keys, or passwords found in the parent directory of the script.
   - Scans the parent directory for suggestive file names like secrets or keys with file extensions **`.yaml`**, **`.json`**, or **`.ini`**. If there is a mention of a key name without a value, it checks the corresponding value in `os.environ` and updates the registry accordingly.
