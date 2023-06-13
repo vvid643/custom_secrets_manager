@@ -1,0 +1,9 @@
+#!/bin/bash
+
+# Extract the version from the tag
+tag=$1
+version=$(echo "$tag" | grep -oP "v\K\d+\.\d+\.\d+")
+
+# Update the __init__.py file with the new version
+sed -i "s/__version__ = '[^']*'/__version__ = '$version'/" /Users/vashishtha/vvid_projects/custom_secrets_manager/custom_secrets_manager/__init__.py
+
