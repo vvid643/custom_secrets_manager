@@ -1,10 +1,1 @@
-A utility for managing secrets and API keys
-
-This starter_process script performs the following tasks:
-  - Creates a `secrets_registry.log` file as a database for secrets, API keys, or passwords found in the parent directory of the script.
-  - Scans the parent directory for suggestive file names like secrets or keys with file extensions **`.yaml`**, **`.json`**, or **`.ini`**. If there is a mention of a key name without a value, it checks the corresponding value in `os.environ` and updates the registry accordingly.
-  - Makes available a `secrets_loader.py` module to load secrets from the secrets_registry.log file.
-  - Generates meaningful logs in the standard output and saves logs in the `load_config_process.log` file in the same directory.
-  - Checks if a `.gitignore` file exists in the directory and ensures that entries are made for secrets files.
-
-Please note that this script assumes that you have the secrets_loader.py module in the same directory as `starter_process.py`
+The custom_secrets_manager package is a powerful Python utility that simplifies configuration management and secrets handling within Git repositories. With just a directory path, the package automatically scans for popular configuration file formats such as YAML, INI, and JSON. It encrypts and securely stores secrets in a dedicated secrets_registry.log file, ensuring sensitive information remains protected. Additionally, by specifying only key names in the configuration file, the package seamlessly loads corresponding secrets from environment variables. This eliminates the need for separate configuration loading utilities and streamlines the development process. custom_secrets_manager is a useful tool for secure and efficient configuration management in Git projects.
