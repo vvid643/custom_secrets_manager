@@ -3,7 +3,7 @@ from custom_secrets_manager import __version__
 
 # Package metadata
 NAME = "custom_secrets_manager"
-DESCRIPTION = "A utility for managing secrets and API keys"
+DESCRIPTION = "A utility for secrets handling"
 AUTHOR = "Vashishtha Vidyarthi"
 LICENSE = "MIT"
 URL = "https://github.com/vvid643/custom_secrets_manager"
