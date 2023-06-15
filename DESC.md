@@ -7,5 +7,3 @@ This starter_process script performs the following tasks:
   - Makes available a `secrets_loader.py` module to load secrets from the secrets_registry.log file.
   - Generates meaningful logs in the standard output and saves logs in the `load_config_process.log` file in the same directory.
   - Checks if a `.gitignore` file exists in the directory and ensures that entries are made for secrets files.
-
-Please note that this script assumes that you have the secrets_loader.py module in the same directory as `starter_process.py`

@@ -5,4 +5,6 @@ The custom_secrets_manager package is a powerful python utility that simplifies 
 
 Installation
 ---
-```pip install custom-secrets-manager```
+```
+pip install custom-secrets-manager
+```
