@@ -104,6 +104,8 @@ def main():
             key_file = os.path.join(current_dir, key_file)
 
         save_encryption_key(key_file, logger)
+    else:
+        logger.warning("Encryption disabled!")
 
     # Scan parent directory for secrets files
     if isinstance(target_file_type, str):
