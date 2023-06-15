@@ -76,8 +76,9 @@ def run_git_cleanup(current_dir, logger):
         logger.warning("Not a git repository. Skipping git clean up.")
         return False
 
+    # Check if .gitignore exists
     check_gitignore(current_dir, logger)
-
+    # Update .gitignore
     update_gitignore(current_dir, logger)
 
     return True
