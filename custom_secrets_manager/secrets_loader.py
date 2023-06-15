@@ -57,7 +57,6 @@ def _parse_nested_dict(dictionary):
     return parsed_dict
 
 
-# Main function to load secrets from supported file types
 def load_secrets(file_path):
     """
     Load secrets from a file.
