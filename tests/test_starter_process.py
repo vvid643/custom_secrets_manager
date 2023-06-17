@@ -100,6 +100,7 @@ def test_main(
     mock_scan_secrets_files,
     mock_git_repository,
 ):
+    # Treat it as a git repository
     mock_git_repository.side_effect = [True]
     starter_process.main()
 
@@ -107,8 +108,10 @@ def test_main(
     mock_scan_secrets_files.call_count == 1
     mock_update_secrets_registry.call_count == 2
 
+    # Treat it as an ordinary dir
     mock_git_repository.side_effect = [False]
     starter_process.main()
 
+    # Add assertions to verify the expected behavior
     mock_scan_secrets_files.call_count == 2
     # mock_load_secrets.assert_called_once()
