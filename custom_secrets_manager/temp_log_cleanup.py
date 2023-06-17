@@ -48,6 +48,7 @@ def update_gitignore(dir_path, logger):
     gitignore_path = os.path.join(dir_path, ".gitignore")
     secrets_registry_entry = "secrets_registry.log"
     load_config_entry = "load_config_process.log"
+    encryption_key_entry = "encryption_key.txt"
 
     with open(gitignore_path, "a+") as f:
         f.seek(0)
@@ -56,7 +57,8 @@ def update_gitignore(dir_path, logger):
             f.write(f"\n{secrets_registry_entry}\n")
         if load_config_entry not in content:
             f.write(f"{load_config_entry}\n")
-
+        if encryption_key_entry not in content:
+            f.write(f"{encryption_key_entry}\n")
     logger.info(".gitignore file updated")
 
 
