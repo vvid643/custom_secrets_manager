@@ -7,3 +7,9 @@ __pycache__
 
 # macos 
 .DS_Store
+
+# pytest mock files
+tests/.gitignore
+tests/encryption_key.txt
+tests/load_config_process.log
+tests/secrets_registry.log
