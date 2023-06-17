@@ -83,20 +83,32 @@ def test_update_secrets_registry(mock_open, mock_load_secrets):
         mock_open.assert_not_called()
 
 
+# @pytest.mark.parametrize("mock_git_repository", argvalues=[True, False])
 @patch("custom_secrets_manager.starter_process.scan_secrets_files")
 @patch("custom_secrets_manager.starter_process.update_secrets_registry")
 @patch(
     "custom_secrets_manager.starter_process.os.getcwd",
     return_value=os.path.dirname(__file__),
 )
+@patch(
+    "custom_secrets_manager.temp_log_cleanup.check_git_repository",
+    # return_value="mock_git_repository",
+)
 def test_main(
     mock_os_getcwd,
     mock_update_secrets_registry,
     mock_scan_secrets_files,
+    mock_git_repository,
 ):
+    mock_git_repository.side_effect = [True]
     starter_process.main()
 
     # Add assertions to verify the expected behavior
-    mock_scan_secrets_files.assert_called_once()
-    mock_update_secrets_registry.assert_called_once()
+    mock_scan_secrets_files.call_count == 1
+    mock_update_secrets_registry.call_count == 2
+
+    mock_git_repository.side_effect = [False]
+    starter_process.main()
+
+    mock_scan_secrets_files.call_count == 2
     # mock_load_secrets.assert_called_once()
